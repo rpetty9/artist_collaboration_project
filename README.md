@@ -2,7 +2,9 @@
 
 Explore interactive, network-style visualizations of artist collaborations based on predicted streaming and revenue data. This tool helps music professionals analyze trends and identify high-potential partnership opportunities.
 
-The two main visualizations are graph_network_artist_collaboration_v2 (Network Graph) and artist_collaboration_cloropleth_map (Cloropleth Map)
+The two main visualizations are:
+- graph_network_artist_collaboration_v2 (Network Graph)
+- artist_collaboration_cloropleth_map (Cloropleth Map)
 
 I have provided filtered down versions of the data to use since the full data files are too large to upload to github.
 
