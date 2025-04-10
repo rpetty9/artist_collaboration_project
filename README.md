@@ -6,7 +6,7 @@ The two main visualizations are graph_network_artist_collaboration_v2 (Network G
 
 I have provided filtered down versions of the data to use since the full data files are too large to upload to github.
 
-This porject is a work in progress and will be finished by 4/18
+This project is a work in progress and will be finished by 4/18
 
 ---
 
