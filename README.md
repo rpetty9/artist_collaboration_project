@@ -10,6 +10,8 @@ I have provided filtered down versions of the data to use since the full data fi
 
 This project is a work in progress and will be finished by 4/18
 
+The datasets for this project can be found here: https://zenodo.org/records/4778563
+
 ---
 
 ## 📆 Table of Contents
