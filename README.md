@@ -1,4 +1,4 @@
-# <img src="https://github.gatech.edu/thackler3/dva-project/blob/master/music_icon.png" alt="Music Icon" width="80"/> Artist Collaboration Network
+# <img src="https://github.com/rpetty9/artist_collaboration_project/blob/main/music_icon.png" alt="Music Icon" width="80"/> Artist Collaboration Network
 
 Explore interactive, network-style visualizations of artist collaborations based on predicted streaming and revenue data. This tool helps music professionals analyze trends and identify high-potential partnership opportunities.
 
