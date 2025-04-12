@@ -81,7 +81,7 @@ for node in G.nodes():
     G.nodes[node]['edge_count'] = G.degree(node)
 
 # Convert to Pyvis Network
-net = Network(height="750px", width="1600px", notebook=True, bgcolor="white", font_color="black")
+net = Network(height="100%", width="100%", notebook=True, bgcolor="white", font_color="black")
 net.from_nx(G)
 
 # Set physics options
@@ -135,7 +135,7 @@ custom_filter = f"""
     position: fixed;
     background-image: url('assets/global_map.png');
     background-repeat: no-repeat;
-    background-position: bottom right;
+    background-position: top left;
     background-size: 300px auto;
     left: 350px; /* Align next to leftPanel */
   }}
