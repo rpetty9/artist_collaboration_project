@@ -26,26 +26,30 @@ for _, row in top_150.iterrows():
 min_rev = min(artist_score.values())
 max_rev = max(artist_score.values())
 
+
 # Define a helper function for scaling node sizes
 def scale_size(revenue, min_rev, max_rev, min_size=10, max_size=30):
     if max_rev == min_rev:
         return (min_size + max_size) / 2
     return min_size + (revenue - min_rev) / (max_rev - min_rev) * (max_size - min_size)
 
+
 # Create the graph
 G = nx.Graph()
 
+
 # Function to extract market codes
 def get_markets(row):
-    """Extract market codes where the artist has non-zero predicted revenue."""
+    """Extract market codes where the artist is present."""
     return [col.split("_")[2] for col in market_cols if row[col] > 2000]
+
 
 # Add nodes and edges with dynamic node sizes based on revenue
 for _, row in top_150.iterrows():
     a1, a2 = row["artist_1_name"], row["artist_2_name"]
     m1 = ",".join(get_markets(row))
     m2 = ",".join(get_markets(row))
-    
+
     # Add artist 1 node with dynamic size
     if a1 not in G:
         G.add_node(a1,
@@ -77,7 +81,7 @@ for node in G.nodes():
     G.nodes[node]['edge_count'] = G.degree(node)
 
 # Convert to Pyvis Network
-net = Network(height="700px", width="100%", notebook=True, bgcolor="white", font_color="black")
+net = Network(height="750px", width="1600px", notebook=True, bgcolor="white", font_color="black")
 net.from_nx(G)
 
 # Set physics options
@@ -121,11 +125,23 @@ custom_filter = f"""
     color: #001f3f !important;
   }}
 
+  html, body {{
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Prevent scrolling */
+  }}
+
   #mynetwork {{
+    position: fixed;
     background-image: url('assets/global_map.png');
     background-repeat: no-repeat;
     background-position: bottom right;
     background-size: 300px auto;
+    left: 350px; /* Align next to leftPanel */
+  }}
+
+  #leftPanel {{
+    top: 200px;
   }}
 </style>
 
@@ -136,7 +152,7 @@ custom_filter = f"""
   var maxRev = {max_rev};
   var minSize = 10;
   var maxSize = 50;
-  
+
   function scaleSize(revenue) {{
       // Avoid division by zero if all revenues are equal
       if (maxRev === minRev) return (minSize + maxSize) / 2;
@@ -144,65 +160,113 @@ custom_filter = f"""
   }}
 </script>
 
-<div style="display: flex; justify-content: space-between; align-items: center; padding: 25px; border-bottom: 2px solid #ccc; background: linear-gradient(135deg, #f0f0f0, #ffffff); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-  <!-- Larger clickable music icon -->
-  <div id="iconContainer" style="flex: 0.8; text-align: left; cursor: pointer;" onclick="resetPage()">
-    <img src="assets/music_icon.png" alt="Music Icon" style="height: 150px; width: auto; vertical-align: middle;" title="Reset to Default">
+<body>
+
+  <div style="display: flex; justify-content: space-between; align-items: center; padding: 25px; 
+    border-bottom: 2px solid #ccc; background: linear-gradient(135deg, #f0f0f0, #ffffff); 
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
+    <!-- Larger clickable music icon -->
+    <div id="iconContainer" style="flex: 0.8; text-align: left; cursor: pointer;" onclick="resetPage()">
+      <img src="assets/music_icon.png" alt="Music Icon" style="height: 150px; width: auto; vertical-align: middle;" 
+        title="Reset to Default">
+    </div>
+
+    <div id="titleContainer" style="flex: 2; text-align: center;">
+      <h1 style="margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 38px; 
+        color: #001f3f;">
+        <span style="font-weight: 600;">Artist Collaboration Network</span> 
+      </h1>
+      <p style="margin: 5px 0 0; font-size: 18px; color: #555;">Analyzing artist collaboration opportunities and revenue potential</p>
+    </div>
+
+    <div id="controlsContainer" style="flex: 1; text-align: right;">
+      <div style="margin-bottom: 10px;">
+        <label for="marketFilter" style="font-weight: bold; color: #001f3f;">Market:</label>
+        <select id="marketFilter" onchange="filterNodes()" style="padding: 6px 12px; font-size: 14px; 
+            border-radius: 5px; border: 1px solid #ccc;">
+          <option value="all" selected>All Markets</option>
+          <option value="au">Australia</option>
+          <option value="br">Brazil</option>
+          <option value="ca">Canada</option>
+          <option value="de">Denmark</option>
+          <option value="fr">France</option>
+          <option value="gb">Great Britain</option>
+          <option value="jp">Japan</option>
+          <option value="us">United States</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 15px;">
+        <label for="edgeCount" style="font-weight: bold; color: #001f3f;">Show Top</label>
+        <select id="edgeCount" onchange="filterNodes()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; 
+            border: 1px solid #ccc;">
+          <option value="50">50</option>
+          <option value="75">75</option>
+          <option value="100">100</option>
+          <option value="125">125</option>
+          <option value="150" selected>150</option>
+        </select>
+        <label style="font-weight: bold; color: #001f3f;">Collaborations</label>
+      </div>
+      <div style="margin-bottom: 10px;">
+        <strong style="color: #001f3f;">Total Collaboration Revenue:</strong>
+        <span id="totalRevenue" style="font-size: 16px; font-weight: bold;">Loading...</span>
+      </div>
+      <div style="margin-bottom: 0px;">
+        <strong style="color: #001f3f;">Total Artist Revenue:</strong>
+        <span id="totalArtistRevenue" style="font-size: 16px; font-weight: bold;">Loading...</span>
+      </div>
+    </div>
   </div>
 
-  <div id="titleContainer" style="flex: 2; text-align: center;">
-    <h1 style="margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 38px; color: #001f3f;">
-      <span style="font-weight: 600;">Artist Collaboration Network</span> 
-    </h1>
-    <p style="margin: 5px 0 0; font-size: 18px; color: #555;">Analyzing artist collaboration oppurtunites and revenue potential</p>
+  <!-- Left Side Panel for Top 3 Collaborations -->
+  <div id="leftPanel" style="
+    width: 350px; 
+    height: 100vh; 
+    position: fixed; 
+    left: 0; 
+    top: 205px; 
+    background: linear-gradient(135deg, #001f3f, #004080); 
+    color: white; 
+    padding: 20px; 
+    font-family: 'Arial', sans-serif; 
+    overflow-y: auto;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    ">
+    <h2 style="text-align: center; font-size: 20px; margin-bottom: 15px; color: white !important;">Top 3 Collaborations by Revenue</h2>
+    <div id="topCollabs"></div>
+    <h2 style="text-align: center; font-size: 20px; margin-top: 30px; margin-bottom: 15px; color: white !important;">Top 3 Artists by Revenue</h2>
+    <div id="topArtists"></div>
   </div>
 
-  <div id="controlsContainer" style="flex: 1; text-align: right;">
-    <div style="margin-bottom: 15px;">
-      <label for="marketFilter" style="font-weight: bold; color: #001f3f;">Market:</label>
-      <select id="marketFilter" onchange="filterNodes()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
-        <option value="all" selected>All Markets</option>
-        <option value="au">Australia</option>
-        <option value="br">Brazil</option>
-        <option value="ca">Canada</option>
-        <option value="de">Denmark</option>
-        <option value="fr">France</option>
-        <option value="gb">Great Britain</option>
-        <option value="jp">Japan</option>
-        <option value="us">United States</option>
-      </select>
-    </div>
-    <div style="margin-bottom: 15px;">
-      <label for="edgeCount" style="font-weight: bold; color: #001f3f;">Show Top</label>
-      <select id="edgeCount" onchange="filterNodes()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; border: 1px solid #ccc;">
-        <option value="50">50</option>
-        <option value="75">75</option>
-        <option value="100">100</option>
-        <option value="125">125</option>
-        <option value="150" selected>150</option>
-      </select>
-      <label style="font-weight: bold; color: #001f3f;">Collaborations</label>
-    </div>
-    <div style="margin-bottom: 15px;">
-      <strong style="color: #001f3f;">Revenue Range:</strong>
-      <span id="revenueRange" style="font-size: 16px; font-weight: bold;">Loading...</span>
-    </div>
-  </div>
-</div>
+  <!-- Network Visualization -->
+  <!-- <div id="mynetwork" style="margin-left: 350px; width: calc(100% - 200px); height: 100vh;"></div> -->
+  <div id="mynetwork"></div>
+
+</body>
+
+
 
 <script>
-// Function to calculate and display the revenue range
-function calculateInitialRevenueRange() {{
+// Function to calculate and display the total sum revenue of all collaborations
+function calculateTotalRevenue() {{
     const allEdges = network.body.data.edges.get();
     const visibleRevenues = allEdges.map(e => e.edge_revenue).filter(rev => rev !== undefined);
 
-    if (visibleRevenues.length > 0) {{
-        const minRevDisplay = Math.min(...visibleRevenues).toLocaleString();
-        const maxRevDisplay = Math.max(...visibleRevenues).toLocaleString();
-        document.getElementById("revenueRange").innerText = `$${{minRevDisplay}} - $${{maxRevDisplay}}`;
-    }} else {{
-        document.getElementById("revenueRange").innerText = "No Revenue Data";
-    }}
+    // Sum up all revenue values
+    const totalRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
+    document.getElementById("totalRevenue").innerText = `$${{totalRevenue.toLocaleString(undefined, 
+        {{minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}`;
+}}
+
+// Function to calculate and display the total sum revenue of all artists
+function calculateTotalArtistRevenue() {{
+    const allNodes = network.body.data.nodes.get();
+    const visibleRevenues = allNodes.map(n => n.revenue).filter(rev => rev !== undefined);
+
+    // Sum up all revenue values
+    const totalArtistRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
+    document.getElementById("totalArtistRevenue").innerText = `$${{totalArtistRevenue.toLocaleString(undefined, 
+        {{minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}`;
 }}
 
 // Filtering function for market and edge count
@@ -240,25 +304,29 @@ function filterNodes() {{
 
     const visibleRevenues = filteredEdges.map(e => e.edge_revenue).filter(rev => rev !== undefined);
 
-    if (visibleRevenues.length > 0) {{
-        const minRevDisplay = Math.min(...visibleRevenues).toLocaleString();
-        const maxRevDisplay = Math.max(...visibleRevenues).toLocaleString();
-        document.getElementById("revenueRange").innerText = `$${{minRevDisplay}} - $${{maxRevDisplay}}`;
-    }} else {{
-        document.getElementById("revenueRange").innerText = "No Revenue Data";
-    }}
-}}
+    // Sum up all collaboration revenue values
+    const totalRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
+    document.getElementById("totalRevenue").innerText = `$${{totalRevenue.toLocaleString(undefined, {{minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}`;
 
+    const visibleNodes = allNodes.filter(node => visibleNodeIDs.has(node.id));
+    const visibleArtistRevenues = visibleNodes.map(n => n.revenue).filter(rev => rev !== undefined);
+
+    // Sum up all artist revenue values
+    const totalArtistRevenue = visibleArtistRevenues.reduce((sum, rev) => sum + rev, 0);
+    document.getElementById("totalArtistRevenue").innerText = `$${{totalArtistRevenue.toLocaleString(undefined, {{minimumFractionDigits: 2, maximumFractionDigits: 2 }})}}`;
+
+    updateLeftPanel();
+}}
 
 function resetPage() {{
   // Reset filters to their default values
   document.getElementById('marketFilter').value = 'all';
   document.getElementById('edgeCount').value = '150';
-  document.getElementById('revenueRange').textContent = 'Loading...';
+  document.getElementById('totalRevenue').textContent = 'Loading...';
 
   // Clear the selected node
   window.selectedNode = null;
-  
+
   // Restore original colors and sizes for all nodes using stored sizes
   network.body.data.nodes.get().forEach(node => {{
     network.body.data.nodes.update({{
@@ -267,10 +335,10 @@ function resetPage() {{
       size: window.originalSizes[node.id]
     }});
   }});
-  
+
   // Reset the graph to the initial state
   filterNodes();
-  
+
   // Zoom out to the desired view (e.g., window.initialScale * 0.6)
   network.moveTo({{
     position: window.initialView,
@@ -279,9 +347,6 @@ function resetPage() {{
   }});
 }}
 
-
-
-
 // Add a DFS function for full component traversal
 function dfs(node, visited, network) {{
     if (visited.has(node)) return;
@@ -289,8 +354,6 @@ function dfs(node, visited, network) {{
     const connectedNodes = network.getConnectedNodes(node);
     connectedNodes.forEach(n => dfs(n, visited, network));
 }}
-
-
 
 window.addEventListener("load", function () {{
     window.selectedNode = null;
@@ -301,13 +364,14 @@ window.addEventListener("load", function () {{
         window.originalColors[node.id] = node.color;
         window.originalSizes[node.id] = node.size;
     }});
-    
+
     // Store the initial view position and scale
     window.initialView = network.getViewPosition();
     window.initialScale = network.getScale();
 
     // Immediately calculate the revenue range on load
-    calculateInitialRevenueRange();
+    calculateTotalRevenue();
+    calculateTotalArtistRevenue();
 
     network.on("click", function (params) {{
         if (params.nodes.length > 0) {{
@@ -315,14 +379,14 @@ window.addEventListener("load", function () {{
             if (window.selectedNode === clickedNode) {{
                 // If clicking the same node again, reset the graph and restore the initial view
                 window.selectedNode = null;
-                
+
                 // Restore initial view with desired zoom (e.g., window.initialScale * 0.6)
                 network.moveTo({{
                   position: window.initialView,
                   scale: window.initialScale * 0.6,
                   animation: {{ duration: 500, easingFunction: "easeInOutQuad" }}
                 }});
-                
+
                 // Restore original colors and sizes using stored values
                 network.body.data.nodes.get().forEach(node => {{
                     network.body.data.nodes.update({{
@@ -373,14 +437,14 @@ window.addEventListener("load", function () {{
         }} else {{
             // Reset the view when clicking outside nodes
             window.selectedNode = null;
-            
+
             // Restore initial view
             network.moveTo({{
               position: window.initialView,
               scale: window.initialScale,
               animation: {{ duration: 500, easingFunction: "easeInOutQuad" }}
             }});
-            
+
             // Restore original colors and sizes using stored values
             network.body.data.nodes.get().forEach(node => {{
                 network.body.data.nodes.update({{
@@ -394,6 +458,76 @@ window.addEventListener("load", function () {{
     }});
 }});
 
+  // Function to update the Top 3 Collaborations Panel
+  function updateLeftPanel() {{
+    const marketFilter = document.getElementById("marketFilter").value;
+    const allNodes = network.body.data.nodes.get();
+    const allEdges = network.body.data.edges.get();
+
+    if (marketFilter === "all") {{
+        filteredEdges = allEdges;
+    }} else {{
+        filteredEdges = allEdges.filter(e => {{
+            const fromNode = network.body.data.nodes.get(e.from);
+            const toNode = network.body.data.nodes.get(e.to);
+            const fromMarkets = fromNode.markets ? fromNode.markets.split(",").map(m => m.trim()) : [];
+            const toMarkets = toNode.markets ? toNode.markets.split(",").map(m => m.trim()) : [];
+            return fromMarkets.includes(marketFilter) || toMarkets.includes(marketFilter);
+        }});
+    }}
+
+    // Sort edges and nodes by estimated revenue (descending)
+    const sortedEdges = filteredEdges.sort((a, b) => (b.edge_revenue || 0) - (a.edge_revenue || 0)).slice(0, 3);
+    const visibleNodeIDs = new Set(filteredEdges.flatMap(e => [e.from, e.to]));
+    const sortedNodes = allNodes.filter(node => visibleNodeIDs.has(node.id))
+        .sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
+        .slice(0, 3);
+
+    // Get the container div
+    const topCollabsDiv = document.getElementById("topCollabs");
+    topCollabsDiv.innerHTML = ""; // Clear previous content
+
+    // Loop through top 3 collaborations and create HTML elements
+    sortedEdges.forEach((edge, index) => {{
+      const fromNode = network.body.data.nodes.get(edge.from);
+      const toNode = network.body.data.nodes.get(edge.to);
+      const revenueFormatted = edge.edge_revenue.toLocaleString("en-US", {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
+
+      const collabHTML = `
+        <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; margin-bottom: 10px;">
+          <h3 style="font-size: 18px; margin: 2px 0;">#${{index + 1}}: ${{fromNode.label}} & ${{toNode.label}}</h3>
+          <p style="font-size: 16px; margin: 2px 0;">Revenue: <strong>$${{revenueFormatted}}</strong></p>
+        </div>
+      `;
+
+      topCollabsDiv.innerHTML += collabHTML;
+    }});
+
+    // Get the container div
+    const topArtistsDiv = document.getElementById("topArtists");
+    topArtistsDiv.innerHTML = ""; // Clear previous content
+
+    // Loop through top 3 collaborations and create HTML elements
+    sortedNodes.forEach((node, index) => {{
+      const artistName = node.label;
+      const revenueFormatted = node.revenue.toLocaleString("en-US", {{minimumFractionDigits: 2, maximumFractionDigits: 2}});
+
+      const topArtistsHTML = `
+        <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; margin-bottom: 10px;">
+          <h3 style="font-size: 18px; margin: 2px 0;">#${{index + 1}}: ${{artistName}}</h3>
+          <p style="font-size: 16px; margin: 2px 0;">Revenue: <strong>$${{revenueFormatted}}</strong></p>
+        </div>
+      `;
+
+      topArtistsDiv.innerHTML += topArtistsHTML;
+    }});
+  }}
+
+  // Call the function when the page loads
+  window.addEventListener("load", updateLeftPanel);
+
+  // Call the function whenever filtering occurs
+  network.on("afterDrawing", updateLeftPanel);
 
 </script>
 """
