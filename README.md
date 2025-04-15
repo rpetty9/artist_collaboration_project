@@ -96,13 +96,7 @@ deactivate
 
 📈 GENERATING COLLABORATION PREDICTIONS (OPTIONAL)
 ---------------------
-This script generates artist collaboration predictions and exports them as a CSV file.
-
-If you'd like to generate your own `artist_collaboration_predictions_by_market.csv`, you can run the following script:
-
-```bash
-assets/generate_collab_predictions.py
-```
+This script `generate_collab_predictions.py` generates artist collaboration predictions and exports them as a CSV file.
 
 **Step 1: File Setup**
 
