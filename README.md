@@ -27,8 +27,11 @@ The tool consists of:
 
 Our project is designed to help users discover insights such of high-potential collaborations between connected artists
 
+
 📥 INSTALLATION
 ------------
+⚠️ **Python Requirement**- Make sure Python **3.10** is installed on your system before running the setup script.  
+
 To set up the project:
 
 1. **Download and unzip the project folder `team043final`**
@@ -88,4 +91,68 @@ deactivate
 
 🎥 DEMO VIDEO
 ---------------------
-📺 https://youtu.be/uzwC4YNMi48
+- 📺 https://youtu.be/uzwC4YNMi48
+
+
+📈 GENERATING COLLABORATION PREDICTIONS (OPTIONAL)
+---------------------
+This script generates artist collaboration predictions and exports them as a CSV file.
+
+If you'd like to generate your own `artist_collaboration_predictions_by_market.csv`, you can run the following script:
+
+```bash
+assets/generate_collab_predictions.py
+```
+
+**Step 1: File Setup**
+
+With the given data files, make sure your working directory looks like this:
+
+```
+Your_Project_Folder/
+├── generate_collab_predictions.py
+├── data/
+│   ├── artist_data/
+│   │   └── Artists/
+│   │       └── spotify_artists_info_complete.csv
+│   ├── hit_songs/
+│   │   └── Hit Songs/
+│   │       └── spotify_hits_dataset_complete.csv
+│   └── charts/
+│       └── Charts/
+│           ├── us/
+│           ├── gb/
+│           ├── jp/
+│           └── ... (all other country folders and year subfolders)
+```
+**Step 2: How to Run the Script**
+
+<table>
+  <thead>
+    <tr>
+      <th>🍎 macOS</th>
+      <th>🐧 Linux</th>
+    </tr>
+  </thead>
+  <tr>
+    <td>
+      <p>Open Terminal.</p>
+      <p>Navigate to the folder where the script is located:</p>
+      <pre><code>cd /Users/yourname/Desktop/team043final/CODE/assets</code></pre>
+      <p>Run the script:</p>
+      <pre><code>python3 generate_collab_predictions.py</code></pre>
+    </td>
+    <td>
+      <p>Open Terminal.</p>
+      <p>Navigate to the folder where the script is located:</p>
+      <pre><code>cd /home/yourname/team043final/CODE/assets</code></pre>
+      <p>Run the script:</p>
+      <pre><code>python3 generate_collab_predictions.py</code></pre>
+    </td>
+  </tr>
+</table>
+
+**Script Output**
+
+<p>After successful execution, a file named <code>artist_collaboration_predictions_by_market.csv</code> will be created inside the <code>assets/</code> folder.</p>
+
