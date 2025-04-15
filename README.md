@@ -42,16 +42,18 @@ To set up the project:
    ```
 
 3. **Run the setup script, it will create a virtual environment and install dependencies for you**
+
    ```bash
    bash setup_env.sh
    ```
+   (Dependencies installed by bash script: pandas, plotly, dash, networkx, pyvis, numpy, scikit-learn)
 
-4. **Activate the virtual environment**
+5. **Activate the virtual environment**
    ```bash
    source venv/bin/activate
    ```
 
-5. **At this point, you should have all the core files organized in the following structure:**
+6. **At this point, you should have all the core files organized in the following structure:**
 ```
 team043final/
 └── CODE/
@@ -68,7 +70,7 @@ team043final/
 
 🚀 EXECUTION
 ---------
-Once the environment is set up and data is in place, run the project with:
+Once the environment is set up, run the project with:
 
 ```bash
 python run_all.py
