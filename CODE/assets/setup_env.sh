@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Creating Python 3.11 virtual environment in ./venv"
-python3.11 -m venv venv
+echo "Creating Python 3.10 virtual environment in ./venv"
+python3.10 -m venv venv
 
 echo "Activating virtual environment"
 source venv/bin/activate
