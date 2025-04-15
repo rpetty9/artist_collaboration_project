@@ -61,4 +61,4 @@ source venv/bin/activate
 
 🎥 DEMO VIDEO
 ---------------------
-📺 https://...
+📺 https://youtu.be/uzwC4YNMi48
