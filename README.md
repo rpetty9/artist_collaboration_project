@@ -93,7 +93,7 @@ deactivate
 
 🎥 DEMO VIDEO
 ---------------------
-- 📺 https://youtu.be/uzwC4YNMi48
+- 📺 https://youtu.be/V3jEN4EqOS8
 
 
 📈 GENERATING COLLABORATION PREDICTIONS (OPTIONAL)
