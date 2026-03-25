@@ -1,6 +1,6 @@
 <table>
   <tr>
-    <td><img src="https://github.gatech.edu/thackler3/dva-project/blob/master/CODE/assets/music_icon.png" alt="Music Icon" width="50"></td>
+    <td><img src="CODE/assets/music_icon.png" alt="Music Icon" width="50"></td>
     <td>Artist Collaboration Network</td>
   </tr>
 </table>
@@ -81,6 +81,24 @@ This script will:
 - Create the interactive Pyvis network graph (`artist_collaborations.html`)
 - Launch the Dash choropleth map at `http://127.0.0.1:8050`
 - Open both in your default web browser automatically
+
+STATIC GITHUB PAGES VERSION
+---------
+This repository also includes a static, browser-only version that can be hosted with GitHub Pages.
+
+Files:
+- `index.html` - landing page for the public site
+- `CODE/artist_collaborations.html` - interactive network graph
+- `CODE/artist_collaboration_map.html` - static choropleth dashboard
+
+To rebuild the static site assets locally:
+
+```bash
+cd CODE/assets
+python build_static_site.py
+```
+
+If the original prediction CSV is missing, the build script will reconstruct a usable replacement from the saved `artist_collaborations.html` graph artifact.
 
 To activate the environment in future sessions run:
 ```bash

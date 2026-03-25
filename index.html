@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Artist Collaboration Project</title>
+  <meta http-equiv="refresh" content="0; url=CODE/artist_collaborations.html">
+  <script>
+    window.location.replace("CODE/artist_collaborations.html");
+  </script>
+  <style>
+    :root {
+      --navy: #052b4f;
+      --gold: #b3a369;
+      --cream: #f8f4ec;
+      --ink: #1d2b36;
+      --panel: rgba(255, 255, 255, 0.84);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Georgia, "Times New Roman", serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top right, rgba(179, 163, 105, 0.28), transparent 28%),
+        linear-gradient(140deg, #fffaf2 0%, #edf4f9 100%);
+      min-height: 100vh;
+    }
+
+    main {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 40px 20px 56px;
+    }
+
+    .hero {
+      background: var(--panel);
+      border: 1px solid rgba(5, 43, 79, 0.12);
+      border-radius: 28px;
+      padding: 28px;
+      box-shadow: 0 20px 55px rgba(5, 43, 79, 0.1);
+      backdrop-filter: blur(10px);
+    }
+
+    .hero-top {
+      display: flex;
+      gap: 20px;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .hero-top img {
+      width: 84px;
+      height: 84px;
+      object-fit: contain;
+      flex: 0 0 auto;
+    }
+
+    .eyebrow {
+      margin: 0 0 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.16em;
+      font-size: 12px;
+      color: var(--gold);
+      font-weight: 700;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--navy);
+      font-size: clamp(32px, 5vw, 54px);
+      line-height: 1.02;
+    }
+
+    .hero p {
+      margin: 10px 0 0;
+      max-width: 780px;
+      font-size: 18px;
+      line-height: 1.55;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 22px;
+      margin-top: 26px;
+    }
+
+    .card {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 240px;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.88);
+      border-radius: 24px;
+      border: 1px solid rgba(5, 43, 79, 0.1);
+      box-shadow: 0 16px 36px rgba(5, 43, 79, 0.08);
+    }
+
+    .card h2 {
+      margin: 0 0 10px;
+      color: var(--navy);
+      font-size: 30px;
+    }
+
+    .card p {
+      margin: 0;
+      line-height: 1.55;
+      font-size: 17px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .button {
+      display: inline-block;
+      text-decoration: none;
+      border-radius: 999px;
+      padding: 12px 18px;
+      font-weight: 700;
+      transition: transform 160ms ease, box-shadow 160ms ease;
+    }
+
+    .button:hover {
+      transform: translateY(-1px);
+    }
+
+    .button-primary {
+      background: var(--navy);
+      color: white;
+      box-shadow: 0 10px 22px rgba(5, 43, 79, 0.18);
+    }
+
+    .button-secondary {
+      background: rgba(179, 163, 105, 0.16);
+      color: var(--navy);
+      border: 1px solid rgba(179, 163, 105, 0.35);
+    }
+
+    .note {
+      margin-top: 22px;
+      padding: 18px 20px;
+      border-radius: 18px;
+      background: rgba(5, 43, 79, 0.06);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    @media (max-width: 860px) {
+      .hero-top {
+        align-items: flex-start;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <section class="hero">
+      <div class="hero-top">
+        <img src="CODE/assets/music_icon.png" alt="Music icon">
+        <div>
+          <p class="eyebrow">Interactive Class Project</p>
+          <h1>Artist Collaboration Network</h1>
+          <p>Redirecting to the main network visualization. If it does not open automatically, use the links below.</p>
+        </div>
+      </div>
+
+      <div class="grid">
+        <article class="card">
+          <div>
+            <h2>Network Graph</h2>
+            <p>Browse the collaboration network as an interactive graph, filter by market, and inspect the highest-value artist pairings.</p>
+          </div>
+          <div class="actions">
+            <a class="button button-primary" href="CODE/artist_collaborations.html">Open Graph</a>
+          </div>
+        </article>
+
+        <article class="card">
+          <div>
+            <h2>Market Map</h2>
+            <p>Use the static choropleth dashboard to switch artists, compare country-level revenue, and review top reconstructed collaboration opportunities.</p>
+          </div>
+          <div class="actions">
+            <a class="button button-primary" href="CODE/artist_collaboration_map.html">Open Map</a>
+          </div>
+        </article>
+      </div>
+
+      <div class="note">
+        The deployed site is static and GitHub Pages friendly. The network view comes from the preserved project output, and the market map is generated from the reconstructed predictions CSV so visitors can explore the project directly in the browser.
+      </div>
+    </section>
+  </main>
+</body>
+</html>
