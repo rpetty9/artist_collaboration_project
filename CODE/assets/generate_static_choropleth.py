@@ -22,7 +22,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Artist Collaboration Earnings by Market</title>
+  <link rel="stylesheet" href="lib/tom-select/tom-select.css">
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script src="lib/tom-select/tom-select.complete.min.js"></script>
   <style>
     :root {{
       --navy: #003057;
@@ -108,7 +110,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .dashboard {{
       display: grid;
-      grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+      grid-template-columns: minmax(0, 1.7fr) minmax(300px, 0.9fr);
       gap: 24px;
       margin-top: 24px;
     }}
@@ -130,7 +132,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       grid-template-columns: 1fr 260px;
       gap: 16px;
       align-items: end;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
     }}
 
     .metric-strip {{
@@ -170,6 +172,9 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     .select-wrap select {{
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
       width: 100%;
       border-radius: 16px;
       border: 1px solid var(--line);
@@ -177,10 +182,68 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       font-size: 16px;
       background: white;
       color: var(--ink);
+      outline: none;
+      box-shadow: none;
+      transition: border-color 140ms ease, box-shadow 140ms ease;
+    }}
+
+    .select-wrap select:focus {{
+      border-color: rgba(0, 48, 87, 0.42);
+      box-shadow: 0 0 0 4px rgba(0, 48, 87, 0.08);
+    }}
+
+    .ts-wrapper {{
+      font-size: 16px;
+    }}
+
+    .ts-control {{
+      border-radius: 16px !important;
+      border: 1px solid var(--line) !important;
+      padding: 14px 16px !important;
+      min-height: 56px !important;
+      box-shadow: none !important;
+    }}
+
+    .ts-control input {{
+      font-size: 16px !important;
+      color: var(--ink) !important;
+    }}
+
+    .ts-control.focus {{
+      border-color: rgba(0, 48, 87, 0.42) !important;
+      box-shadow: 0 0 0 4px rgba(0, 48, 87, 0.08) !important;
+    }}
+
+    .ts-dropdown {{
+      border-radius: 16px !important;
+      border: 1px solid rgba(0, 48, 87, 0.12) !important;
+      overflow: hidden;
+    }}
+
+    .ts-dropdown .active {{
+      background: rgba(0, 48, 87, 0.08) !important;
+      color: var(--navy) !important;
+    }}
+
+    .market-chip-row {{
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin: 8px 0 14px;
+    }}
+
+    .market-chip {{
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(0, 48, 87, 0.07);
+      color: var(--navy);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
     }}
 
     #map {{
-      height: 680px;
+      height: 600px;
     }}
 
     .sidebar {{
@@ -201,14 +264,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
 
     .collab-list {{
       display: grid;
-      gap: 12px;
-      max-height: 760px;
+      gap: 10px;
+      max-height: 680px;
       overflow: auto;
       padding-right: 4px;
     }}
 
     .collab-card {{
-      padding: 14px 16px;
+      padding: 12px 14px;
       border-radius: 18px;
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 247, 250, 0.92));
       border: 1px solid rgba(0, 48, 87, 0.1);
@@ -227,6 +290,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       color: rgba(31, 43, 56, 0.82);
     }}
 
+    @media (max-width: 1240px) {{
+      .dashboard {{
+        grid-template-columns: 1fr;
+      }}
+    }}
+
     @media (max-width: 980px) {{
       .hero {{
         grid-template-columns: 72px 1fr;
@@ -236,16 +305,12 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         justify-self: start;
       }}
 
-      .dashboard {{
-        grid-template-columns: 1fr;
-      }}
-
       .controls {{
         grid-template-columns: 1fr;
       }}
 
       #map {{
-        height: 520px;
+        height: 460px;
       }}
     }}
   </style>
@@ -280,6 +345,7 @@ HTML_TEMPLATE = """<!DOCTYPE html>
             <select id="artistSelect"></select>
           </div>
         </div>
+        <div id="topMarkets" class="market-chip-row"></div>
         <div id="map"></div>
       </div>
 
@@ -298,6 +364,8 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     const totalRevenueEl = document.getElementById("totalRevenue");
     const collabCountEl = document.getElementById("collabCount");
     const collabListEl = document.getElementById("collaborationList");
+    const topMarketsEl = document.getElementById("topMarkets");
+    let artistPicker;
 
     function currency(value) {{
       return new Intl.NumberFormat("en-US", {{
@@ -336,11 +404,22 @@ HTML_TEMPLATE = """<!DOCTYPE html>
       }});
     }}
 
+    function renderMarketChips(markets) {{
+      topMarketsEl.innerHTML = "";
+      markets.forEach((market) => {{
+        const chip = document.createElement("span");
+        chip.className = "market-chip";
+        chip.textContent = market;
+        topMarketsEl.appendChild(chip);
+      }});
+    }}
+
     function renderMap(artist) {{
       const view = dashboardData[artist];
       totalRevenueEl.textContent = currency(view.total_revenue);
       collabCountEl.textContent = String(view.collaboration_count);
       renderCollaborations(view.top_collaborations);
+      renderMarketChips(view.top_markets);
 
       const data = [{{
         type: "choropleth",
@@ -372,7 +451,14 @@ HTML_TEMPLATE = """<!DOCTYPE html>
         geo: {{
           projection: {{type: "natural earth"}},
           showframe: false,
-          showcoastlines: false,
+          showcoastlines: true,
+          coastlinecolor: "rgba(130, 144, 160, 0.35)",
+          showcountries: true,
+          countrycolor: "rgba(130, 144, 160, 0.28)",
+          showland: true,
+          landcolor: "rgba(214, 221, 228, 0.34)",
+          showocean: true,
+          oceancolor: "rgba(255, 255, 255, 0)",
           bgcolor: "rgba(0,0,0,0)"
         }}
       }};
@@ -381,9 +467,19 @@ HTML_TEMPLATE = """<!DOCTYPE html>
     }}
 
     buildOptions();
-    selectEl.value = artistOrder[0];
-    renderMap(selectEl.value);
-    selectEl.addEventListener("change", () => renderMap(selectEl.value));
+    artistPicker = new TomSelect("#artistSelect", {{
+      create: false,
+      maxItems: 1,
+      sortField: {{
+        field: "text",
+        direction: "asc"
+      }},
+      placeholder: "Search artists...",
+      searchField: ["text"]
+    }});
+    artistPicker.setValue(artistOrder[0], true);
+    renderMap(artistOrder[0]);
+    artistPicker.on("change", (value) => renderMap(value));
   </script>
 </body>
 </html>
@@ -444,6 +540,7 @@ def main() -> None:
                 }
                 for row in top_collaborations.itertuples(index=False)
             ],
+            "top_markets": merged_df.sort_values("revenue", ascending=False)["country"].head(3).tolist(),
         }
 
     html = HTML_TEMPLATE.format(

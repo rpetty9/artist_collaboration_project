@@ -1,75 +1,432 @@
 <html>
-    <head>
-<!-- Include noUiSlider CSS and JS -->
-<link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.css" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.6.1/nouislider.min.js"></script>
+    <head><style>
+  :root {
+    --navy: #10294f;
+    --navy-soft: rgba(16, 41, 79, 0.88);
+    --gold: #b8a466;
+    --gold-soft: rgba(184, 164, 102, 0.14);
+    --ink: #1b2736;
+    --muted: #607085;
+    --panel: rgba(255, 255, 255, 0.88);
+    --line: rgba(16, 41, 79, 0.1);
+    --shadow: 0 20px 50px rgba(16, 41, 79, 0.12);
+  }
 
-<!-- Custom CSS: Set the background of the network container -->
-<style>
-  /* Set global font color to match the edge color */
-  body, h1, h2, h3, h4, h5, h6, p, label, select, option, span, div, a, button {
-    color: #001f3f !important;
+  * {
+    box-sizing: border-box;
   }
 
   html, body {
     height: 100%;
     margin: 0;
-    overflow: hidden; /* Prevent scrolling */
+    overflow: hidden;
+    font-family: Georgia, "Times New Roman", serif;
+    color: var(--ink);
+    background:
+      radial-gradient(circle at top left, rgba(184, 164, 102, 0.22), transparent 28%),
+      linear-gradient(135deg, #f8f5ee 0%, #edf3f9 100%);
+  }
+
+  body, h1, h2, h3, h4, h5, h6, p, label, select, option, span, div, a, button {
+    color: var(--ink);
   }
 
   #mynetwork {
-    position: fixed;
+    position: fixed !important;
+    inset: 126px 26px 26px 26px !important;
+    width: auto !important;
+    height: auto !important;
+    border-radius: 34px;
+    border: 1px solid rgba(16, 41, 79, 0.1);
+    background:
+      radial-gradient(circle at top left, rgba(184, 164, 102, 0.09), transparent 34%),
+      linear-gradient(180deg, rgba(255,255,255,0.92), rgba(247,249,252,0.9)) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.7), var(--shadow);
+    overflow: hidden;
+  }
+
+  #mynetwork::after {
+    content: "";
+    position: absolute;
+    top: 22px;
+    left: 22px;
+    width: 200px;
+    height: 134px;
+    opacity: 0.16;
     background-image: url('assets/global_map.png');
     background-repeat: no-repeat;
-    background-position: top left;
-    background-size: 300px auto;
-    left: 350px; /* Align next to leftPanel */
+    background-size: contain;
+    pointer-events: none;
+  }
+
+  #uiLayer {
+    position: fixed;
+    inset: 18px;
+    z-index: 20;
+    pointer-events: none;
+  }
+
+  .panel {
+    pointer-events: auto;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 24px;
+    box-shadow: var(--shadow);
+    backdrop-filter: blur(14px);
+  }
+
+  #heroBar {
+    display: grid;
+    grid-template-columns: 90px 1fr 324px;
+    gap: 18px;
+    align-items: center;
+    padding: 16px 18px;
+  }
+
+  #iconButton {
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    border: 1px solid rgba(184, 164, 102, 0.32);
+    background: linear-gradient(180deg, rgba(255,255,255,0.92), rgba(246,241,226,0.95));
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  #iconButton:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(16, 41, 79, 0.12);
+  }
+
+  #iconButton img {
+    width: 52px;
+    height: 52px;
+    object-fit: contain;
+  }
+
+  #titleContainer h1 {
+    margin: 0;
+    color: var(--navy);
+    font-size: clamp(30px, 3.2vw, 48px);
+    letter-spacing: -0.03em;
+  }
+
+  #titleContainer p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 17px;
+  }
+
+  #heroMeta {
+    display: grid;
+    gap: 8px;
+    justify-items: end;
+  }
+
+  .meta-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    border-radius: 999px;
+    background: rgba(16, 41, 79, 0.06);
+    color: var(--navy);
+    font-size: 14px;
+  }
+
+  .meta-chip strong {
+    color: var(--navy);
   }
 
   #leftPanel {
-    top: 200px;
+    position: fixed;
+    left: 36px;
+    top: 146px;
+    width: 330px;
+    max-height: calc(100vh - 178px);
+    padding: 18px;
+    overflow: auto;
+  }
+
+  #controlsPanel {
+    position: fixed;
+    right: 36px;
+    top: 146px;
+    width: 320px;
+    padding: 18px;
+    max-height: calc(100vh - 178px);
+    overflow: auto;
+  }
+
+  .panel-title {
+    margin: 0;
+    color: var(--navy);
+    font-size: 25px;
+    letter-spacing: -0.02em;
+  }
+
+  .panel-copy {
+    margin: 8px 0 0;
+    color: var(--muted);
+    line-height: 1.45;
+    font-size: 15px;
+  }
+
+  .section-kicker {
+    display: inline-block;
+    margin-top: 18px;
+    color: var(--gold);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+  }
+
+  .stats-grid {
+    display: grid;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .stat-card {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, rgba(16, 41, 79, 0.95), rgba(44, 83, 130, 0.92));
+    color: white !important;
+  }
+
+  .stat-card *, .stat-card strong {
+    color: white !important;
+  }
+
+  .stat-label {
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    opacity: 0.72;
+  }
+
+  .stat-value {
+    margin-top: 6px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+  }
+
+  .control-group {
+    margin-top: 18px;
+  }
+
+  .control-group label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+  }
+
+  .control-group select {
+    width: 100%;
+    padding: 13px 15px;
+    border-radius: 16px;
+    border: 1px solid rgba(16, 41, 79, 0.16);
+    background: rgba(255,255,255,0.92);
+    color: var(--ink);
+    font-size: 16px;
+  }
+
+  .hint {
+    margin-top: 14px;
+    padding: 12px 14px;
+    border-radius: 16px;
+    background: var(--gold-soft);
+    color: var(--navy);
+    line-height: 1.5;
+    font-size: 14px;
+  }
+
+  .rank-list {
+    display: grid;
+    gap: 10px;
+    margin-top: 14px;
+  }
+
+  .rank-card {
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: 1px solid rgba(16, 41, 79, 0.08);
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(245,248,251,0.92));
+  }
+
+  .rank-card .rank {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+    margin-bottom: 8px;
+    border-radius: 999px;
+    background: rgba(16, 41, 79, 0.08);
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .rank-card h3 {
+    margin: 0;
+    font-size: 20px;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+  }
+
+  .rank-card p {
+    margin: 6px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  #selectionCard {
+    margin-top: 18px;
+    padding: 16px;
+    border-radius: 18px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(245,248,251,0.92));
+    border: 1px solid rgba(16, 41, 79, 0.08);
+  }
+
+  #selectionCard h3 {
+    margin: 0;
+    font-size: 22px;
+    color: var(--navy);
+    letter-spacing: -0.02em;
+  }
+
+  #selectionCard p {
+    margin: 7px 0 0;
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .selection-empty {
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  @media (max-width: 1180px) {
+    #heroBar {
+      grid-template-columns: 80px 1fr;
+    }
+
+    #heroMeta {
+      justify-items: start;
+      grid-column: span 2;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #leftPanel, #controlsPanel {
+      width: 290px;
+    }
+  }
+
+  @media (max-width: 980px) {
+    #uiLayer {
+      inset: 12px;
+    }
+
+    #heroBar {
+      grid-template-columns: 70px 1fr;
+      gap: 14px;
+    }
+
+    #titleContainer p {
+      font-size: 15px;
+    }
+
+    #leftPanel, #controlsPanel {
+      position: static;
+      width: auto;
+      max-height: none;
+      margin-top: 12px;
+    }
+
+    #mynetwork {
+      inset: 320px 12px 12px 12px !important;
+    }
   }
 </style>
 
-<!-- Define dynamic scaling variables and function -->
 <script>
-  // These values come from your Python code
   var minRev = 21093.732409200944;
   var maxRev = 183801.73888457194;
   var minSize = 10;
   var maxSize = 50;
+  var marketNames = {
+    all: "All Markets",
+    au: "Australia",
+    br: "Brazil",
+    ca: "Canada",
+    de: "Denmark",
+    fr: "France",
+    gb: "Great Britain",
+    jp: "Japan",
+    us: "United States"
+  };
 
   function scaleSize(revenue) {
-      // Avoid division by zero if all revenues are equal
       if (maxRev === minRev) return (minSize + maxSize) / 2;
       return minSize + ((revenue - minRev) / (maxRev - minRev)) * (maxSize - minSize);
   }
 </script>
 
 <body>
+  <div id="uiLayer">
+    <section id="heroBar" class="panel">
+      <button id="iconButton" onclick="resetPage()" title="Reset to default view">
+        <img src="assets/music_icon.png" alt="Music Icon">
+      </button>
+      <div id="titleContainer">
+        <h1>Artist Collaboration Network</h1>
+        <p>Click an artist to isolate a collaboration cluster, compare top opportunities, and switch between market slices without losing the network context.</p>
+      </div>
+      <div id="heroMeta">
+        <div class="meta-chip"><strong>View:</strong> network + market filters</div>
+        <div class="meta-chip"><strong>Tip:</strong> tap a node to focus its cluster</div>
+      </div>
+    </section>
 
-  <div style="display: flex; justify-content: space-between; align-items: center; padding: 25px; 
-    border-bottom: 2px solid #ccc; background: linear-gradient(135deg, #f0f0f0, #ffffff); 
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);">
-    <!-- Larger clickable music icon -->
-    <div id="iconContainer" style="flex: 0.8; text-align: left; cursor: pointer;" onclick="resetPage()">
-      <img src="assets/music_icon.png" alt="Music Icon" style="height: 150px; width: auto; vertical-align: middle;" 
-        title="Reset to Default">
-    </div>
+    <aside id="leftPanel" class="panel">
+      <h2 class="panel-title">Live Highlights</h2>
+      <p class="panel-copy">The graph stays central while the strongest pairings and artists stay nearby as quick-glance insight cards.</p>
 
-    <div id="titleContainer" style="flex: 2; text-align: center;">
-      <h1 style="margin: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; font-size: 38px; 
-        color: #001f3f;">
-        <span style="font-weight: 600;">Artist Collaboration Network</span> 
-      </h1>
-      <p style="margin: 5px 0 0; font-size: 18px; color: #555;">Analyzing artist collaboration opportunities and revenue potential</p>
-    </div>
+      <span class="section-kicker">Top Collaborations</span>
+      <div id="topCollabs" class="rank-list"></div>
 
-    <div id="controlsContainer" style="flex: 1; text-align: right;">
-      <div style="margin-bottom: 10px;">
-        <label for="marketFilter" style="font-weight: bold; color: #001f3f;">Market:</label>
-        <select id="marketFilter" onchange="filterNodes()" style="padding: 6px 12px; font-size: 14px; 
-            border-radius: 5px; border: 1px solid #ccc;">
+      <span class="section-kicker">Top Artists</span>
+      <div id="topArtists" class="rank-list"></div>
+    </aside>
+
+    <aside id="controlsPanel" class="panel">
+      <h2 class="panel-title">Filters & Totals</h2>
+      <p class="panel-copy">Tighten the network by market or edge count, then inspect the totals for the currently visible slice.</p>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-label">Collaboration Revenue</div>
+          <div id="totalRevenue" class="stat-value">Loading...</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Visible Artist Revenue</div>
+          <div id="totalArtistRevenue" class="stat-value">Loading...</div>
+        </div>
+      </div>
+
+      <div class="control-group">
+        <label for="marketFilter">Market</label>
+        <select id="marketFilter" onchange="handleFilterChange()">
           <option value="all" selected>All Markets</option>
           <option value="au">Australia</option>
           <option value="br">Brazil</option>
@@ -81,340 +438,296 @@
           <option value="us">United States</option>
         </select>
       </div>
-      <div style="margin-bottom: 15px;">
-        <label for="edgeCount" style="font-weight: bold; color: #001f3f;">Show Top</label>
-        <select id="edgeCount" onchange="filterNodes()" style="padding: 6px 12px; font-size: 14px; border-radius: 5px; 
-            border: 1px solid #ccc;">
+
+      <div class="control-group">
+        <label for="edgeCount">Show Top Collaborations</label>
+        <select id="edgeCount" onchange="handleFilterChange()">
           <option value="50">50</option>
           <option value="75">75</option>
           <option value="100">100</option>
           <option value="125">125</option>
           <option value="150" selected>150</option>
         </select>
-        <label style="font-weight: bold; color: #001f3f;">Collaborations</label>
       </div>
-      <div style="margin-bottom: 10px;">
-        <strong style="color: #001f3f;">Total Collaboration Revenue:</strong>
-        <span id="totalRevenue" style="font-size: 16px; font-weight: bold;">Loading...</span>
+
+      <div class="hint" id="marketHint">Currently showing the entire collaboration graph.</div>
+
+      <div id="selectionCard">
+        <span class="section-kicker" style="margin-top:0;">Selection</span>
+        <div id="selectionContent" class="selection-empty">Click a node to spotlight its connected collaboration cluster.</div>
       </div>
-      <div style="margin-bottom: 0px;">
-        <strong style="color: #001f3f;">Total Artist Revenue:</strong>
-        <span id="totalArtistRevenue" style="font-size: 16px; font-weight: bold;">Loading...</span>
-      </div>
-    </div>
+    </aside>
   </div>
-
-  <!-- Left Side Panel for Top 3 Collaborations -->
-  <div id="leftPanel" style="
-    width: 350px; 
-    height: 100vh; 
-    position: fixed; 
-    left: 0; 
-    top: 205px; 
-    background: linear-gradient(135deg, #001f3f, #004080); 
-    color: white; 
-    padding: 20px; 
-    font-family: 'Arial', sans-serif; 
-    overflow-y: auto;
-    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
-    ">
-    <h2 style="text-align: center; font-size: 20px; margin-bottom: 15px; color: white !important;">Top 3 Collaborations by Revenue</h2>
-    <div id="topCollabs"></div>
-    <h2 style="text-align: center; font-size: 20px; margin-top: 30px; margin-bottom: 15px; color: white !important;">Top 3 Artists by Revenue</h2>
-    <div id="topArtists"></div>
-  </div>
-
-  <!-- Network Visualization -->
-  <!-- <div id="mynetwork" style="margin-left: 350px; width: calc(100% - 200px); height: 100vh;"></div> -->
-  <div id="mynetwork"></div>
-
 </body>
 
-
-
 <script>
-// Function to calculate and display the total sum revenue of all collaborations
-function calculateTotalRevenue() {
-    const allEdges = network.body.data.edges.get();
-    const visibleRevenues = allEdges.map(e => e.edge_revenue).filter(rev => rev !== undefined);
-
-    // Sum up all revenue values
-    const totalRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
-    document.getElementById("totalRevenue").innerText = `$${totalRevenue.toLocaleString(undefined, 
-        {minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function formatCurrency(value) {
+  return value.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-// Function to calculate and display the total sum revenue of all artists
-function calculateTotalArtistRevenue() {
-    const allNodes = network.body.data.nodes.get();
-    const visibleRevenues = allNodes.map(n => n.revenue).filter(rev => rev !== undefined);
-
-    // Sum up all revenue values
-    const totalArtistRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
-    document.getElementById("totalArtistRevenue").innerText = `$${totalArtistRevenue.toLocaleString(undefined, 
-        {minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+function deepClone(value) {
+  return JSON.parse(JSON.stringify(value));
 }
 
-// Filtering function for market and edge count
-function filterNodes() {
-    const marketFilter = document.getElementById("marketFilter").value;
-    const maxEdges = Number(document.getElementById("edgeCount").value);
-    const allEdges = network.body.data.edges.get();
-    const allNodes = network.body.data.nodes.get();
-    let filteredEdges;
+function calculateTotals(filteredEdges, visibleNodes) {
+  const visibleRevenues = filteredEdges.map(edge => edge.edge_revenue).filter(rev => rev !== undefined);
+  const totalRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
+  document.getElementById("totalRevenue").innerText = `$${formatCurrency(totalRevenue)}`;
 
-    if (marketFilter === "all") {
-        filteredEdges = allEdges;
-        document.getElementById("mynetwork").style.backgroundImage = "url('assets/global_map.png')";
-    } else {
-        filteredEdges = allEdges.filter(e => {
-            const fromNode = network.body.data.nodes.get(e.from);
-            const toNode = network.body.data.nodes.get(e.to);
-            const fromMarkets = fromNode.markets ? fromNode.markets.split(",").map(m => m.trim()) : [];
-            const toMarkets = toNode.markets ? toNode.markets.split(",").map(m => m.trim()) : [];
-            return fromMarkets.includes(marketFilter) || toMarkets.includes(marketFilter);
-        });
-        document.getElementById("mynetwork").style.backgroundImage = `url('assets/${marketFilter}_map.png')`;
-    }
+  const artistRevenues = visibleNodes.map(node => node.revenue).filter(rev => rev !== undefined);
+  const totalArtistRevenue = artistRevenues.reduce((sum, rev) => sum + rev, 0);
+  document.getElementById("totalArtistRevenue").innerText = `$${formatCurrency(totalArtistRevenue)}`;
+}
 
-    filteredEdges = filteredEdges.slice(0, maxEdges);
-    const visibleNodeIDs = new Set(filteredEdges.flatMap(e => [e.from, e.to]));
+function getFilteredEdges() {
+  const marketFilter = document.getElementById("marketFilter").value;
+  const maxEdges = Number(document.getElementById("edgeCount").value);
+  const allEdges = network.body.data.edges.get();
 
-    allNodes.forEach(n => {
-        network.body.data.nodes.update({ id: n.id, hidden: !visibleNodeIDs.has(n.id) });
+  let filteredEdges = allEdges;
+  if (marketFilter !== "all") {
+    filteredEdges = allEdges.filter(edge => {
+      const fromNode = network.body.data.nodes.get(edge.from);
+      const toNode = network.body.data.nodes.get(edge.to);
+      const fromMarkets = fromNode.markets ? fromNode.markets.split(",").map(m => m.trim()) : [];
+      const toMarkets = toNode.markets ? toNode.markets.split(",").map(m => m.trim()) : [];
+      return fromMarkets.includes(marketFilter) || toMarkets.includes(marketFilter);
     });
+  }
 
-    allEdges.forEach(e => {
-        network.body.data.edges.update({ id: e.id, hidden: !filteredEdges.includes(e) });
-    });
-
-    const visibleRevenues = filteredEdges.map(e => e.edge_revenue).filter(rev => rev !== undefined);
-
-    // Sum up all collaboration revenue values
-    const totalRevenue = visibleRevenues.reduce((sum, rev) => sum + rev, 0);
-    document.getElementById("totalRevenue").innerText = `$${totalRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-    const visibleNodes = allNodes.filter(node => visibleNodeIDs.has(node.id));
-    const visibleArtistRevenues = visibleNodes.map(n => n.revenue).filter(rev => rev !== undefined);
-
-    // Sum up all artist revenue values
-    const totalArtistRevenue = visibleArtistRevenues.reduce((sum, rev) => sum + rev, 0);
-    document.getElementById("totalArtistRevenue").innerText = `$${totalArtistRevenue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
-
-    updateLeftPanel();
+  return filteredEdges.slice(0, maxEdges);
 }
 
-function resetPage() {
-  // Reset filters to their default values
-  document.getElementById('marketFilter').value = 'all';
-  document.getElementById('edgeCount').value = '150';
-  document.getElementById('totalRevenue').textContent = 'Loading...';
+function applyBaseFilter() {
+  const filteredEdges = getFilteredEdges();
+  const allEdges = network.body.data.edges.get();
+  const allNodes = network.body.data.nodes.get();
+  const visibleNodeIDs = new Set(filteredEdges.flatMap(edge => [edge.from, edge.to]));
+  const visibleNodes = allNodes.filter(node => visibleNodeIDs.has(node.id));
 
-  // Clear the selected node
-  window.selectedNode = null;
-
-  // Restore original colors and sizes for all nodes using stored sizes
-  network.body.data.nodes.get().forEach(node => {
+  allNodes.forEach(node => {
     network.body.data.nodes.update({
       id: node.id,
-      color: window.originalColors[node.id],
+      hidden: !visibleNodeIDs.has(node.id),
+      color: deepClone(window.originalColors[node.id]),
+      font: deepClone(window.originalFonts[node.id]),
       size: window.originalSizes[node.id]
     });
   });
 
-  // Reset the graph to the initial state
-  filterNodes();
+  allEdges.forEach(edge => {
+    const visible = filteredEdges.some(filtered => filtered.id === edge.id);
+    network.body.data.edges.update({
+      id: edge.id,
+      hidden: !visible,
+      color: edge.color
+    });
+  });
 
-  // Zoom out to the desired view (e.g., window.initialScale * 0.6)
+  const marketFilter = document.getElementById("marketFilter").value;
+  document.getElementById("marketHint").innerText = marketFilter === "all"
+    ? "Currently showing the entire collaboration graph."
+    : `Showing the strongest visible collaborations touching ${marketNames[marketFilter]}.`;
+
+  calculateTotals(filteredEdges, visibleNodes);
+  updateLeftPanel(filteredEdges, visibleNodes);
+  return { filteredEdges, visibleNodes };
+}
+
+function clearSelectionCard() {
+  document.getElementById("selectionContent").innerHTML =
+    '<div class="selection-empty">Click a node to spotlight its connected collaboration cluster.</div>';
+}
+
+function updateSelectionCard(nodeId, connectedEdges) {
+  const node = network.body.data.nodes.get(nodeId);
+  const markets = node.markets
+    ? node.markets.split(",").filter(m => m && m !== "overall").map(m => marketNames[m] || m).join(", ")
+    : "No market tags";
+  const totalConnectedRevenue = connectedEdges
+    .map(edge => edge.edge_revenue || 0)
+    .reduce((sum, value) => sum + value, 0);
+
+  document.getElementById("selectionContent").innerHTML = `
+    <h3>${node.label}</h3>
+    <p><strong>Estimated artist revenue:</strong> $${formatCurrency(node.revenue || 0)}</p>
+    <p><strong>Connected collaborations:</strong> ${connectedEdges.length}</p>
+    <p><strong>Cluster revenue:</strong> $${formatCurrency(totalConnectedRevenue)}</p>
+    <p><strong>Markets:</strong> ${markets || "No market tags"}</p>
+  `;
+}
+
+function focusCluster(clickedNode) {
+  const filteredEdges = getFilteredEdges();
+  const allowedEdgeIds = new Set(filteredEdges.map(edge => edge.id));
+  const allowedNodeIds = new Set(filteredEdges.flatMap(edge => [edge.from, edge.to]));
+  const queue = [clickedNode];
+  const visited = new Set();
+
+  while (queue.length > 0) {
+    const current = queue.shift();
+    if (visited.has(current) || !allowedNodeIds.has(current)) continue;
+    visited.add(current);
+    network.getConnectedNodes(current).forEach(neighbor => {
+      if (allowedNodeIds.has(neighbor)) queue.push(neighbor);
+    });
+  }
+
+  const allNodes = network.body.data.nodes.get();
+  const allEdges = network.body.data.edges.get();
+  const connectedEdges = filteredEdges.filter(edge => visited.has(edge.from) && visited.has(edge.to));
+
+  allNodes.forEach(node => {
+    const inCluster = visited.has(node.id);
+    const isSelected = node.id === clickedNode;
+    network.body.data.nodes.update({
+      id: node.id,
+      hidden: !allowedNodeIds.has(node.id),
+      color: isSelected
+        ? { background: "#d6be71", border: "#10294f", highlight: { background: "#d6be71", border: "#10294f" } }
+        : inCluster
+          ? deepClone(window.originalColors[node.id])
+          : { background: "rgba(182, 188, 198, 0.24)", border: "rgba(182, 188, 198, 0.24)", highlight: { background: "rgba(182, 188, 198, 0.24)", border: "rgba(182, 188, 198, 0.24)" } },
+      font: isSelected || inCluster
+        ? deepClone(window.originalFonts[node.id])
+        : { color: "rgba(109, 120, 137, 0.55)", size: 10, face: "georgia" },
+      size: isSelected
+        ? window.originalSizes[node.id] + 6
+        : inCluster
+          ? window.originalSizes[node.id]
+          : Math.max(7, window.originalSizes[node.id] - 2)
+    });
+  });
+
+  allEdges.forEach(edge => {
+    const visible = allowedEdgeIds.has(edge.id);
+    const inCluster = visited.has(edge.from) && visited.has(edge.to);
+    network.body.data.edges.update({
+      id: edge.id,
+      hidden: !visible,
+      color: inCluster ? "#17355d" : "rgba(169, 177, 188, 0.18)"
+    });
+  });
+
+  const nodePosition = network.getPositions([clickedNode])[clickedNode];
+  network.moveTo({
+    position: nodePosition,
+    scale: 1.08,
+    animation: { duration: 420, easingFunction: "easeInOutQuad" }
+  });
+
+  updateSelectionCard(clickedNode, connectedEdges);
+}
+
+function handleFilterChange() {
+  window.selectedNode = null;
+  clearSelectionCard();
+  applyBaseFilter();
+}
+
+function resetPage() {
+  document.getElementById("marketFilter").value = "all";
+  document.getElementById("edgeCount").value = "150";
+  window.selectedNode = null;
+  clearSelectionCard();
+  applyBaseFilter();
   network.moveTo({
     position: window.initialView,
-    scale: window.initialScale * 0.6,
+    scale: window.initialScale * 0.82,
     animation: { duration: 500, easingFunction: "easeInOutQuad" }
   });
 }
 
-// Add a DFS function for full component traversal
-function dfs(node, visited, network) {
-    if (visited.has(node)) return;
-    visited.add(node);
-    const connectedNodes = network.getConnectedNodes(node);
-    connectedNodes.forEach(n => dfs(n, visited, network));
+function renderRankCards(containerId, entries, formatter) {
+  const container = document.getElementById(containerId);
+  container.innerHTML = "";
+
+  entries.forEach((entry, index) => {
+    const card = document.createElement("article");
+    card.className = "rank-card";
+    card.innerHTML = `
+      <span class="rank">#${index + 1}</span>
+      <h3>${formatter.title(entry)}</h3>
+      <p>${formatter.subtitle(entry)}</p>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function updateLeftPanel(filteredEdges, visibleNodes) {
+  const sortedEdges = [...filteredEdges]
+    .sort((a, b) => (b.edge_revenue || 0) - (a.edge_revenue || 0))
+    .slice(0, 3);
+  const sortedNodes = [...visibleNodes]
+    .sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
+    .slice(0, 3);
+
+  renderRankCards("topCollabs", sortedEdges, {
+    title: edge => `${edge.from} & ${edge.to}`,
+    subtitle: edge => `Revenue: $${formatCurrency(edge.edge_revenue || 0)}`
+  });
+
+  renderRankCards("topArtists", sortedNodes, {
+    title: node => node.label,
+    subtitle: node => `Revenue: $${formatCurrency(node.revenue || 0)}`
+  });
 }
 
 window.addEventListener("load", function () {
-    window.selectedNode = null;
-    window.originalColors = {};
-    window.originalSizes = {};
-    // Store original colors and sizes (using dynamic sizes from revenue)
-    network.body.data.nodes.get().forEach(node => {
-        window.originalColors[node.id] = node.color;
-        window.originalSizes[node.id] = node.size;
+  window.selectedNode = null;
+  window.originalColors = {};
+  window.originalFonts = {};
+  window.originalSizes = {};
+
+  network.body.data.nodes.get().forEach(node => {
+    window.originalColors[node.id] = deepClone(node.color);
+    window.originalFonts[node.id] = deepClone(node.font || { color: "#2b313b", size: 11, face: "georgia" });
+    window.originalSizes[node.id] = node.size;
+
+    network.body.data.nodes.update({
+      id: node.id,
+      font: { color: "#516173", size: 10, face: "georgia" }
     });
+  });
 
-    // Store the initial view position and scale
-    window.initialView = network.getViewPosition();
-    window.initialScale = network.getScale();
+  window.initialView = network.getViewPosition();
+  window.initialScale = network.getScale();
+  applyBaseFilter();
+  network.moveTo({
+    position: window.initialView,
+    scale: window.initialScale * 0.82,
+    animation: false
+  });
 
-    // Immediately calculate the revenue range on load
-    calculateTotalRevenue();
-    calculateTotalArtistRevenue();
-
-    network.on("click", function (params) {
-        if (params.nodes.length > 0) {
-            const clickedNode = params.nodes[0];
-            if (window.selectedNode === clickedNode) {
-                // If clicking the same node again, reset the graph and restore the initial view
-                window.selectedNode = null;
-
-                // Restore initial view with desired zoom (e.g., window.initialScale * 0.6)
-                network.moveTo({
-                  position: window.initialView,
-                  scale: window.initialScale * 0.6,
-                  animation: { duration: 500, easingFunction: "easeInOutQuad" }
-                });
-
-                // Restore original colors and sizes using stored values
-                network.body.data.nodes.get().forEach(node => {
-                    network.body.data.nodes.update({
-                        id: node.id,
-                        color: window.originalColors[node.id],
-                        size: window.originalSizes[node.id]
-                    });
-                });
-                filterNodes();
-            } else {
-                // Highlight the full interconnected chain
-                window.selectedNode = clickedNode;
-                const visited = new Set();
-                const queue = [clickedNode];
-                // Breadth-First Search (BFS) to find the entire chain
-                while (queue.length > 0) {
-                    const current = queue.shift();
-                    if (!visited.has(current)) {
-                        visited.add(current);
-                        const neighbors = network.getConnectedNodes(current);
-                        queue.push(...neighbors);
-                    }
-                }
-                // Display all interconnected nodes
-                const visibleNodes = [...visited];
-                const allNodes = network.body.data.nodes.get();
-                const allEdges = network.body.data.edges.get();
-                allNodes.forEach(n => {
-                    network.body.data.nodes.update({
-                        id: n.id,
-                        hidden: !visibleNodes.includes(n.id),
-                        color: n.id === clickedNode ? "green" : window.originalColors[n.id],
-                        size: n.id === clickedNode ? window.originalSizes[n.id] + 5 : window.originalSizes[n.id]
-                    });
-                });
-                allEdges.forEach(e => {
-                    const showEdge = visibleNodes.includes(e.from) && visibleNodes.includes(e.to);
-                    network.body.data.edges.update({ id: e.id, hidden: !showEdge });
-                });
-                // Zoom in on the clicked node
-                const nodePosition = network.getPositions([clickedNode])[clickedNode];
-                network.moveTo({
-                    position: nodePosition,
-                    scale: 1.2,
-                    animation: { duration: 500, easingFunction: "easeInOutQuad" }
-                });
-            }
-        } else {
-            // Reset the view when clicking outside nodes
-            window.selectedNode = null;
-
-            // Restore initial view
-            network.moveTo({
-              position: window.initialView,
-              scale: window.initialScale,
-              animation: { duration: 500, easingFunction: "easeInOutQuad" }
-            });
-
-            // Restore original colors and sizes using stored values
-            network.body.data.nodes.get().forEach(node => {
-                network.body.data.nodes.update({
-                    id: node.id,
-                    color: window.originalColors[node.id],
-                    size: window.originalSizes[node.id]
-                });
-            });
-            filterNodes();
-        }
-    });
-});
-
-  // Function to update the Top 3 Collaborations Panel
-  function updateLeftPanel() {
-    const marketFilter = document.getElementById("marketFilter").value;
-    const allNodes = network.body.data.nodes.get();
-    const allEdges = network.body.data.edges.get();
-
-    if (marketFilter === "all") {
-        filteredEdges = allEdges;
-    } else {
-        filteredEdges = allEdges.filter(e => {
-            const fromNode = network.body.data.nodes.get(e.from);
-            const toNode = network.body.data.nodes.get(e.to);
-            const fromMarkets = fromNode.markets ? fromNode.markets.split(",").map(m => m.trim()) : [];
-            const toMarkets = toNode.markets ? toNode.markets.split(",").map(m => m.trim()) : [];
-            return fromMarkets.includes(marketFilter) || toMarkets.includes(marketFilter);
+  network.on("click", function (params) {
+    if (params.nodes.length > 0) {
+      const clickedNode = params.nodes[0];
+      if (window.selectedNode === clickedNode) {
+        window.selectedNode = null;
+        clearSelectionCard();
+        applyBaseFilter();
+        network.moveTo({
+          position: window.initialView,
+          scale: window.initialScale * 0.82,
+          animation: { duration: 420, easingFunction: "easeInOutQuad" }
         });
+      } else {
+        window.selectedNode = clickedNode;
+        applyBaseFilter();
+        focusCluster(clickedNode);
+      }
+    } else {
+      window.selectedNode = null;
+      clearSelectionCard();
+      applyBaseFilter();
+      network.moveTo({
+        position: window.initialView,
+        scale: window.initialScale * 0.82,
+        animation: { duration: 420, easingFunction: "easeInOutQuad" }
+      });
     }
-
-    // Sort edges and nodes by estimated revenue (descending)
-    const sortedEdges = filteredEdges.sort((a, b) => (b.edge_revenue || 0) - (a.edge_revenue || 0)).slice(0, 3);
-    const visibleNodeIDs = new Set(filteredEdges.flatMap(e => [e.from, e.to]));
-    const sortedNodes = allNodes.filter(node => visibleNodeIDs.has(node.id))
-        .sort((a, b) => (b.revenue || 0) - (a.revenue || 0))
-        .slice(0, 3);
-
-    // Get the container div
-    const topCollabsDiv = document.getElementById("topCollabs");
-    topCollabsDiv.innerHTML = ""; // Clear previous content
-
-    // Loop through top 3 collaborations and create HTML elements
-    sortedEdges.forEach((edge, index) => {
-      const fromNode = network.body.data.nodes.get(edge.from);
-      const toNode = network.body.data.nodes.get(edge.to);
-      const revenueFormatted = edge.edge_revenue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-      const collabHTML = `
-        <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; margin-bottom: 10px;">
-          <h3 style="font-size: 18px; margin: 2px 0;">#${index + 1}: ${fromNode.label} & ${toNode.label}</h3>
-          <p style="font-size: 16px; margin: 2px 0;">Revenue: <strong>$${revenueFormatted}</strong></p>
-        </div>
-      `;
-
-      topCollabsDiv.innerHTML += collabHTML;
-    });
-
-    // Get the container div
-    const topArtistsDiv = document.getElementById("topArtists");
-    topArtistsDiv.innerHTML = ""; // Clear previous content
-
-    // Loop through top 3 collaborations and create HTML elements
-    sortedNodes.forEach((node, index) => {
-      const artistName = node.label;
-      const revenueFormatted = node.revenue.toLocaleString("en-US", {minimumFractionDigits: 2, maximumFractionDigits: 2});
-
-      const topArtistsHTML = `
-        <div style="background: rgba(255,255,255,0.6); border-radius: 10px; padding: 10px; margin-bottom: 10px;">
-          <h3 style="font-size: 18px; margin: 2px 0;">#${index + 1}: ${artistName}</h3>
-          <p style="font-size: 16px; margin: 2px 0;">Revenue: <strong>$${revenueFormatted}</strong></p>
-        </div>
-      `;
-
-      topArtistsDiv.innerHTML += topArtistsHTML;
-    });
-  }
-
-  // Call the function when the page loads
-  window.addEventListener("load", updateLeftPanel);
-
-  // Call the function whenever filtering occurs
-  network.on("afterDrawing", updateLeftPanel);
-
+  });
+});
 </script>
 
         <meta charset="utf-8">

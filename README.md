@@ -5,6 +5,11 @@
   </tr>
 </table>
 
+LIVE DEMO
+---------
+- Main network visualization: https://rpetty9.github.io/artist_collaboration_project/CODE/artist_collaborations.html
+- Market map visualization: https://rpetty9.github.io/artist_collaboration_project/CODE/artist_collaboration_map.html
+
 
 
 
